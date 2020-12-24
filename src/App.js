@@ -1,25 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import Searchbar from "./components/Searchbar";
+import MovieList from "./components/MovieList";
+import { getMoviesByTerm } from "./api/TMDB";
+import Pagination from "./components/Pagination.js";
 
-function App() {
+const App = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [movies, setMovies] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await getMoviesByTerm(searchTerm, setMovies, currentPage, setTotalPages);
+  };
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const nextPage = async (page_number) => {
+    setCurrentPage(page_number);
+    await getMoviesByTerm(searchTerm, setMovies, currentPage, setTotalPages);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Searchbar handleChange={handleChange} handleSubmit={handleSubmit} />
+      <MovieList movies={movies} />
+      {totalPages > 1 ? (
+        <Pagination
+          nextPage={nextPage}
+          currentPage={currentPage}
+          totalPages={totalPages}
+        />
+      ) : (
+        ""
+      )}
     </div>
   );
-}
+};
 
 export default App;
